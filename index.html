@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statistical Inference Labs 6 & 7 - Quiz (Answers Hidden)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        .question-card { transition: all 0.3s ease; cursor: pointer; position: relative; overflow: hidden; }
+        .question-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1); }
+        .question-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; transition: width 0.3s ease; }
+        .lab6-card::before { background: linear-gradient(to bottom, #3b82f6, #1d4ed8); }
+        .lab7-card::before { background: linear-gradient(to bottom, #10b981, #047857); }
+        .question-card:hover::before { width: 6px; }
+        .answer-container { max-height: 0; overflow: hidden; opacity: 0; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .answer-container.open { max-height: 600px; opacity: 1; margin-top: 1rem; }
+        .option { transition: all 0.2s ease; }
+        .option:hover { transform: translateX(5px); }
+        .lab6-badge { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .lab7-badge { background: linear-gradient(135deg, #10b981, #047857); }
+        .tab-active { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3); }
+        .tab-inactive { background-color: white; }
+        .progress-bar { height: 6px; background: linear-gradient(90deg, #3b82f6, #10b981); border-radius: 3px; transition: width 0.5s ease; }
+        .question-number { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .search-highlight { background-color: #fef3c7; padding: 0 2px; border-radius: 2px; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Same header as before -->
+        <header class="mb-12 text-center">
+            <div class="inline-block p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-lg">
+                <i class="fas fa-microscope text-white text-3xl"></i>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent mb-3">
+                Statistical Inference Labs 6 & 7
+            </h1>
+            <p class="text-gray-600 text-lg mb-8 max-w-3xl mx-auto">
+                Interactive Quiz • 60 Questions • <strong class="text-red-600">Answers & correct options are 100% hidden until you click!</strong>
+            </p>
+            <!-- Stats, Tabs, Search, Progress Bar (same as original) -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
+                <div class="bg-white rounded-xl p-5 shadow-lg border border-blue-100"><div class="text-3xl font-bold text-blue-600 mb-2">60</div><div class="text-gray-600">Total Questions</div></div>
+                <div class="bg-white rounded-xl p-5 shadow-lg border border-blue-100"><div class="text-3xl font-bold text-blue-500 mb-2">30</div><div class="text-gray-600">K-Means Questions</div></div>
+                <div class="bg-white rounded-xl p-5 shadow-lg border border-green-100"><div class="text-3xl font-bold text-green-500 mb-2">30</div><div class="text-gray-600">Naive Bayes Questions</div></div>
+                <div class="bg-white rounded-xl p-5 shadow-lg border border-purple-100"><div class="text-3xl font-bold text-purple-500 mb-2">2</div><div class="text-gray-600">Labs Covered</div></div>
+            </div>
+            <div class="flex flex-wrap justify-center mb-10 gap-2">
+                <button id="tab-all" class="tab-active rounded-full px-6 py-3 font-semibold transition-all duration-300"><i class="fas fa-layer-group mr-2"></i>All Questions</button>
+                <button id="tab-lab6" class="tab-inactive rounded-full px-6 py-3 font-semibold border border-blue-200 text-blue-600 hover:bg-blue-50 transition-all duration-300"><i class="fas fa-shapes mr-2"></i>Lab 6: K-Means</button>
+                <button id="tab-lab7" class="tab-inactive rounded-full px-6 py-3 font-semibold border border-green-200 text-green-600 hover:bg-green-50 transition-all duration-300"><i class="fas fa-brain mr-2"></i>Lab 7: Naive Bayes</button>
+                <button id="tab-unanswered" class="tab-inactive rounded-full px-6 py-3 font-semibold border border-amber-200 text-amber-600 hover:bg-amber-50 transition-all duration-300"><i class="fas fa-eye-slash mr-2"></i>Hide All Answers</button>
+            </div>
+            <div class="max-w-md mx-auto mb-8">
+                <div class="relative">
+                    <input type="text" id="search-input" placeholder="Search questions..." class="w-full p-4 pl-12 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+            <div class="mb-10">
+                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <span>Progress: <span id="answered-count">0</span>/<span id="total-count">60</span> revealed</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div id="progress-bar" class="progress-bar h-3 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+        </header>
+
+        <div id="quiz-container" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Questions inserted by JS -->
+        </div>
+
+        <footer class="mt-16 pt-10 border-t border-gray-200 text-center text-gray-500 text-sm">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-gray-700 font-medium">Statistical Inference Labs 6 & 7 Quiz</p>
+                    <p class="mt-1">Click any question to reveal answer • Perfect for real self-testing</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center"><div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div><span class="text-sm">K-Means</span></div>
+                    <div class="flex items-center"><div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div><span class="text-sm">Naive Bayes</span></div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+const quizData = [
+            // Lab 6 Questions (1-30) - K-Means Clustering
+            {
+                id: 1,
+                lab: "lab6",
+                question: "What type of learning method is K-means clustering?",
+                options: [
+                    "Supervised learning",
+                    "Unsupervised learning", 
+                    "Reinforcement learning",
+                    "Semi-supervised learning"
+                ],
+                correctAnswer: 1,
+                explanation: "K-means is an unsupervised learning method because it works with unlabeled data and finds patterns without pre-existing classifications."
+            },
+            {
+                id: 2,
+                lab: "lab6",
+                question: "In the context of clustering, what does 'k' represent in K-means?",
+                options: [
+                    "The number of features in the dataset",
+                    "The number of clusters to form",
+                    "The number of iterations",
+                    "The kernel type"
+                ],
+                correctAnswer: 1,
+                explanation: "'k' represents the number of clusters to form, which must be specified by the user before running the algorithm."
+            },
+            {
+                id: 3,
+                lab: "lab6",
+                question: "Which R package contains the kmeans() function used in Lab 6?",
+                options: [
+                    "stats",
+                    "cluster",
+                    "caret",
+                    "factoextra"
+                ],
+                correctAnswer: 0,
+                explanation: "The kmeans() function is part of the base R stats package, though the lab mentions installing the 'cluster' package for additional clustering functionality."
+            },
+            {
+                id: 4,
+                lab: "lab6",
+                question: "What does the 'centers' parameter in the kmeans() function specify?",
+                options: [
+                    "The maximum number of iterations",
+                    "Either the number of clusters or initial cluster centers",
+                    "The algorithm to be used",
+                    "The convergence tolerance"
+                ],
+                correctAnswer: 1,
+                explanation: "The 'centers' parameter can be either the number of clusters (k) or a set of initial cluster centers."
+            },
+            {
+                id: 5,
+                lab: "lab6",
+                question: "Which algorithm is used by default in R's kmeans() function?",
+                options: [
+                    "Lloyd",
+                    "Forgy",
+                    "MacQueen",
+                    "Hartigan-Wong"
+                ],
+                correctAnswer: 3,
+                explanation: "The Hartigan-Wong algorithm is the default in R's kmeans() function if no algorithm is specified."
+            },
+            {
+                id: 6,
+                lab: "lab6",
+                question: "In Lab 6, which dataset is used for the K-means clustering example?",
+                options: [
+                    "mtcars",
+                    "ChickWeight",
+                    "Iris",
+                    "Titanic"
+                ],
+                correctAnswer: 2,
+                explanation: "The Iris dataset is used in Lab 6, containing measurements of 150 iris flowers from three species."
+            },
+            {
+                id: 7,
+                lab: "lab6",
+                question: "How many samples are there for each species in the Iris dataset?",
+                options: [
+                    "30",
+                    "40",
+                    "50",
+                    "60"
+                ],
+                correctAnswer: 2,
+                explanation: "The Iris dataset has 50 samples from each of the three species: setosa, versicolor, and virginica."
+            },
+            {
+                id: 8,
+                lab: "lab6",
+                question: "Which column is set to NULL before applying K-means to the Iris dataset in the lab?",
+                options: [
+                    "Sepal.Length",
+                    "Sepal.Width",
+                    "Petal.Length",
+                    "Species"
+                ],
+                correctAnswer: 3,
+                explanation: "The Species column (the class label) is set to NULL because K-means is an unsupervised method that shouldn't use class labels."
+            },
+            {
+                id: 9,
+                lab: "lab6",
+                question: "What does kc$cluster contain in the K-means output?",
+                options: [
+                    "Cluster centers",
+                    "Within-cluster sum of squares",
+                    "Cluster assignments for each point",
+                    "Between-cluster sum of squares"
+                ],
+                correctAnswer: 2,
+                explanation: "kc$cluster is a vector indicating which cluster each data point has been assigned to (values from 1 to k)."
+            },
+            {
+                id: 10,
+                lab: "lab6",
+                question: "In the lab results, which Iris species was perfectly clustered by K-means?",
+                options: [
+                    "Iris setosa",
+                    "Iris versicolor",
+                    "Iris virginica",
+                    "None were perfectly clustered"
+                ],
+                correctAnswer: 0,
+                explanation: "The table shows all 50 setosa flowers were correctly grouped in cluster 2, while versicolor and virginica had some misclassifications."
+            },
+            {
+                id: 11,
+                lab: "lab6",
+                question: "What visualization is created in Lab 6 to show the clustering results?",
+                options: [
+                    "A dendrogram",
+                    "A scatter plot of Sepal.Length vs Sepal.Width colored by cluster",
+                    "A heatmap",
+                    "A silhouette plot"
+                ],
+                correctAnswer: 1,
+                explanation: "The lab creates a scatter plot of Sepal.Length vs Sepal.Width with points colored by their cluster assignment, and cluster centers marked with stars."
+            },
+            {
+                id: 12,
+                lab: "lab6",
+                question: "Which component of kmeans output contains the cluster centers?",
+                options: [
+                    "kc$centers",
+                    "kc$cluster",
+                    "kc$withinss",
+                    "kc$tot.withinss"
+                ],
+                correctAnswer: 0,
+                explanation: "kc$centers is a matrix containing the coordinates of the cluster centers."
+            },
+            {
+                id: 13,
+                lab: "lab6",
+                question: "What does 'tot.withinss' represent in the K-means output?",
+                options: [
+                    "Total sum of squares",
+                    "Between-cluster sum of squares",
+                    "Total within-cluster sum of squares",
+                    "Vector of within-cluster sum of squares"
+                ],
+                correctAnswer: 2,
+                explanation: "tot.withinss is the total within-cluster sum of squares, calculated as sum(withinss)."
+            },
+            {
+                id: 14,
+                lab: "lab6",
+                question: "What is the purpose of the nstart parameter in kmeans()?",
+                options: [
+                    "Specifies the number of clusters",
+                    "Specifies the number of random initializations",
+                    "Specifies the maximum iterations",
+                    "Specifies the algorithm to use"
+                ],
+                correctAnswer: 1,
+                explanation: "nstart specifies how many random sets of initial centers should be tried. Higher values give more stable results."
+            },
+            {
+                id: 15,
+                lab: "lab6",
+                question: "In the lab example, how many clusters were specified for the Iris dataset?",
+                options: [
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                ],
+                correctAnswer: 1,
+                explanation: "The lab used k=3 clusters for the Iris dataset, matching the three known species."
+            },
+            {
+                id: 16,
+                lab: "lab6",
+                question: "What is the main goal of clustering analysis?",
+                options: [
+                    "To predict future values",
+                    "To classify data into predefined categories",
+                    "To find natural groupings in data",
+                    "To reduce dimensionality of data"
+                ],
+                correctAnswer: 2,
+                explanation: "Clustering aims to find natural groupings or patterns in data without using pre-defined class labels."
+            },
+            {
+                id: 17,
+                lab: "lab6",
+                question: "Which of these is NOT a typical application of K-means clustering?",
+                options: [
+                    "Customer segmentation",
+                    "Image compression",
+                    "Document classification",
+                    "Time series forecasting"
+                ],
+                correctAnswer: 3,
+                explanation: "Time series forecasting is typically done with regression or ARIMA models, not clustering."
+            },
+            {
+                id: 18,
+                lab: "lab6",
+                question: "What does 'iter.max' parameter control in kmeans()?",
+                options: [
+                    "Maximum number of random initializations",
+                    "Maximum number of algorithm iterations",
+                    "Maximum number of clusters to try",
+                    "Maximum allowed sum of squares"
+                ],
+                correctAnswer: 1,
+                explanation: "iter.max sets the maximum number of iterations allowed for the algorithm to converge."
+            },
+            {
+                id: 19,
+                lab: "lab6",
+                question: "How does K-means algorithm initialize cluster centers by default?",
+                options: [
+                    "Uniformly spaced across data range",
+                    "At the origin (0,0,...)",
+                    "Random selection of data points",
+                    "Using principal components"
+                ],
+                correctAnswer: 2,
+                explanation: "By default, K-means randomly selects k data points as initial cluster centers."
+            },
+            {
+                id: 20,
+                lab: "lab6",
+                question: "What is a common method to determine the optimal number of clusters (k)?",
+                options: [
+                    "Elbow method using within-cluster sum of squares",
+                    "Maximum likelihood estimation",
+                    "Cross-validation accuracy",
+                    "Correlation analysis"
+                ],
+                correctAnswer: 0,
+                explanation: "The elbow method plots within-cluster sum of squares against k and looks for an 'elbow' point."
+            },
+            {
+                id: 21,
+                lab: "lab6",
+                question: "Which of these distance metrics is commonly used in K-means?",
+                options: [
+                    "Euclidean distance",
+                    "Manhattan distance",
+                    "Cosine similarity",
+                    "Mahalanobis distance"
+                ],
+                correctAnswer: 0,
+                explanation: "K-means typically uses Euclidean distance, though variants can use other distance metrics."
+            },
+            {
+                id: 22,
+                lab: "lab6",
+                question: "What is a limitation of K-means clustering?",
+                options: [
+                    "Requires labeled data",
+                    "Sensitive to outliers",
+                    "Only works with categorical data",
+                    "Cannot handle more than 3 clusters"
+                ],
+                correctAnswer: 1,
+                explanation: "K-means is sensitive to outliers because they can significantly affect the calculation of cluster centers."
+            },
+            {
+                id: 23,
+                lab: "lab6",
+                question: "In the Iris dataset results, which cluster contained only setosa flowers?",
+                options: [
+                    "Cluster 1",
+                    "Cluster 2",
+                    "Cluster 3",
+                    "All clusters had mixed species"
+                ],
+                correctAnswer: 1,
+                explanation: "The confusion matrix shows cluster 2 contained all 50 setosa flowers and no other species."
+            },
+            {
+                id: 24,
+                lab: "lab6",
+                question: "What does the 'betweenss' component represent in K-means output?",
+                options: [
+                    "Total variance within clusters",
+                    "Variance between cluster centers",
+                    "Total sum of squares",
+                    "Iterations between convergence"
+                ],
+                correctAnswer: 1,
+                explanation: "betweenss represents the between-cluster sum of squares, calculated as totss - tot.withinss."
+            },
+            {
+                id: 25,
+                lab: "lab6",
+                question: "Which function is used to read the Iris dataset in the lab?",
+                options: [
+                    "read.csv()",
+                    "data()",
+                    "load()",
+                    "It's already available in R"
+                ],
+                correctAnswer: 3,
+                explanation: "The Iris dataset is included in base R, so it's already available without loading from a file."
+            },
+            {
+                id: 26,
+                lab: "lab6",
+                question: "How many features does the Iris dataset have?",
+                options: [
+                    "3",
+                    "4",
+                    "5",
+                    "6"
+                ],
+                correctAnswer: 1,
+                explanation: "The Iris dataset has 4 features: Sepal.Length, Sepal.Width, Petal.Length, and Petal.Width."
+            },
+            {
+                id: 27,
+                lab: "lab6",
+                question: "What is the shape of K-means cluster boundaries?",
+                options: [
+                    "Linear",
+                    "Circular/Spherical",
+                    "Irregular",
+                    "Hyperbolic"
+                ],
+                correctAnswer: 1,
+                explanation: "K-means with Euclidean distance creates spherical (circular in 2D) cluster boundaries."
+            },
+            {
+                id: 28,
+                lab: "lab6",
+                question: "Which plot function is used to visualize the transaction data in the lab?",
+                options: [
+                    "plot()",
+                    "image()",
+                    "hist()",
+                    "boxplot()"
+                ],
+                correctAnswer: 1,
+                explanation: "The image() function creates a grid visualization showing which items are in which transactions."
+            },
+            {
+                id: 29,
+                lab: "lab6",
+                question: "What does 'withinss' represent in K-means output?",
+                options: [
+                    "Total variance in the dataset",
+                    "Variance within each cluster",
+                    "Distance between clusters",
+                    "Number of iterations needed"
+                ],
+                correctAnswer: 1,
+                explanation: "withinss is a vector containing the within-cluster sum of squares for each cluster."
+            },
+            {
+                id: 30,
+                lab: "lab6",
+                question: "Which of these is TRUE about K-means clustering?",
+                options: [
+                    "It always finds the global optimum",
+                    "It requires features to be normally distributed",
+                    "Results can vary with different initializations",
+                    "It works best with categorical variables"
+                ],
+                correctAnswer: 2,
+                explanation: "K-means can converge to local optima, so results may vary with different random initializations."
+            },
+            // Lab 7 Questions (31-60) - Naive Bayes Classification
+            {
+                id: 31,
+                lab: "lab7",
+                question: "What type of learning is Naive Bayes classification?",
+                options: [
+                    "Unsupervised learning",
+                    "Supervised learning",
+                    "Reinforcement learning",
+                    "Self-supervised learning"
+                ],
+                correctAnswer: 1,
+                explanation: "Naive Bayes is a supervised learning algorithm because it requires labeled training data to learn the relationships between features and classes."
+            },
+            {
+                id: 32,
+                lab: "lab7",
+                question: "Which theorem is the Naive Bayes algorithm based on?",
+                options: [
+                    "Central Limit Theorem",
+                    "Pythagorean Theorem",
+                    "Bayes Theorem",
+                    "Law of Large Numbers"
+                ],
+                correctAnswer: 2,
+                explanation: "Naive Bayes is based on Bayes' Theorem, which describes the probability of an event based on prior knowledge of conditions related to the event."
+            },
+            {
+                id: 33,
+                lab: "lab7",
+                question: "What is the 'naive' assumption in Naive Bayes?",
+                options: [
+                    "All features are equally important",
+                    "All classes are equally likely",
+                    "Features are conditionally independent given the class",
+                    "The prior probability is always uniform"
+                ],
+                correctAnswer: 2,
+                explanation: "The 'naive' assumption is that all features are conditionally independent given the class label, which simplifies calculations significantly."
+            },
+            {
+                id: 34,
+                lab: "lab7",
+                question: "Which R package contains the naiveBayes() function used in Lab 7?",
+                options: [
+                    "e1071",
+                    "caret",
+                    "naivebayes",
+                    "klaR"
+                ],
+                correctAnswer: 0,
+                explanation: "The naiveBayes() function is in the e1071 package, which is installed and loaded in the lab instructions."
+            },
+            {
+                id: 35,
+                lab: "lab7",
+                question: "In Lab 7, which dataset is used for the Naive Bayes classification example?",
+                options: [
+                    "Iris",
+                    "ChickWeight",
+                    "mtcars",
+                    "AirPassengers"
+                ],
+                correctAnswer: 1,
+                explanation: "The ChickWeight dataset is used in Lab 7, containing weight measurements of chicks on different diets."
+            },
+            {
+                id: 36,
+                lab: "lab7",
+                question: "What is the target variable (class) in the ChickWeight Naive Bayes example?",
+                options: [
+                    "weight",
+                    "Time",
+                    "Chick",
+                    "Diet"
+                ],
+                correctAnswer: 3,
+                explanation: "The target variable is Diet (with values 1, 2, 3, 4), which the model tries to predict based on weight and Time."
+            },
+            {
+                id: 37,
+                lab: "lab7",
+                question: "Which R function is used to combine data frames by rows in the lab?",
+                options: [
+                    "cbind()",
+                    "rbind()",
+                    "merge()",
+                    "join()"
+                ],
+                correctAnswer: 1,
+                explanation: "rbind() is used to combine selected rows from different parts of the ChickWeight dataset to create training and test sets."
+            },
+            {
+                id: 38,
+                lab: "lab7",
+                question: "What does the formula 'Diet ~ weight + Time' specify in the naiveBayes() function?",
+                options: [
+                    "Diet predicts weight and Time",
+                    "weight and Time predict Diet",
+                    "Diet, weight, and Time are all independent",
+                    "Diet equals weight plus Time"
+                ],
+                correctAnswer: 1,
+                explanation: "The formula 'Diet ~ weight + Time' specifies that Diet is the target variable predicted by weight and Time as features."
+            },
+            {
+                id: 39,
+                lab: "lab7",
+                question: "Which function is used to make predictions with the trained Naive Bayes model?",
+                options: [
+                    "naiveBayes()",
+                    "predict()",
+                    "classify()",
+                    "forecast()"
+                ],
+                correctAnswer: 1,
+                explanation: "The predict() function is used to apply the trained Naive Bayes model to new data and make predictions."
+            },
+            {
+                id: 40,
+                lab: "lab7",
+                question: "What does the table() function show in the lab results?",
+                options: [
+                    "The confusion matrix",
+                    "The frequency distribution of predicted classes",
+                    "The feature importance scores",
+                    "The probability estimates for each class"
+                ],
+                correctAnswer: 1,
+                explanation: "table(DietPrediction) shows the frequency distribution of the predicted Diet classes in the test set."
+            },
+            {
+                id: 41,
+                lab: "lab7",
+                question: "In the first example of Lab 7, how many test instances were predicted as Diet 3?",
+                options: [
+                    "0",
+                    "10",
+                    "22",
+                    "12"
+                ],
+                correctAnswer: 0,
+                explanation: "The output shows: 'DietPrediction: 1 2 3 4' with counts '22 10 0 12', meaning 0 instances were predicted as Diet 3."
+            },
+            {
+                id: 42,
+                lab: "lab7",
+                question: "Which of the following is NOT a common algorithm for classification problems mentioned in Lab 7?",
+                options: [
+                    "Nearest Neighbor",
+                    "Naive Bayes",
+                    "Decision Trees",
+                    "K-means"
+                ],
+                correctAnswer: 3,
+                explanation: "K-means is a clustering (unsupervised) algorithm, not a classification algorithm. The lab lists Nearest Neighbor, Naive Bayes, Decision Trees, and SVM as classification algorithms."
+            },
+            {
+                id: 43,
+                lab: "lab7",
+                question: "In the hands-on exercise at the end of Lab 7, which dataset is suggested for practice?",
+                options: [
+                    "Iris",
+                    "ChickWeight",
+                    "Titanic",
+                    "Boston Housing"
+                ],
+                correctAnswer: 2,
+                explanation: "The hands-on exercise suggests using the Titanic dataset to predict survival based on Class, Sex, and Age using Naive Bayes."
+            },
+            {
+                id: 44,
+                lab: "lab7",
+                question: "What is P(A|B) in Bayes' Theorem?",
+                options: [
+                    "Prior probability of A",
+                    "Prior probability of B",
+                    "Conditional probability of A given B",
+                    "Conditional probability of B given A"
+                ],
+                correctAnswer: 2,
+                explanation: "P(A|B) is the conditional probability of event A occurring given that event B has occurred."
+            },
+            {
+                id: 45,
+                lab: "lab7",
+                question: "In supervised learning, what does 'labeled data' mean?",
+                options: [
+                    "Data with feature names",
+                    "Data with correct answers/outcomes provided",
+                    "Data with row and column labels",
+                    "Data that has been normalized"
+                ],
+                correctAnswer: 1,
+                explanation: "Labeled data in supervised learning means the dataset includes both input features and the correct output/target values, which the model learns from."
+            },
+            {
+                id: 46,
+                lab: "lab7",
+                question: "Which of these is a key advantage of Naive Bayes?",
+                options: [
+                    "Can handle missing data perfectly",
+                    "Works well with very high-dimensional data",
+                    "Always outperforms other classifiers",
+                    "Requires very little training data"
+                ],
+                correctAnswer: 1,
+                explanation: "Naive Bayes performs well with high-dimensional data because of its conditional independence assumption."
+            },
+            {
+                id: 47,
+                lab: "lab7",
+                question: "What type of variables does the standard Naive Bayes classifier handle?",
+                options: [
+                    "Only continuous variables",
+                    "Only categorical variables",
+                    "Both continuous and categorical",
+                    "Only binary variables"
+                ],
+                correctAnswer: 2,
+                explanation: "Naive Bayes can handle both continuous (using Gaussian distribution) and categorical variables (using frequency counts)."
+            },
+            {
+                id: 48,
+                lab: "lab7",
+                question: "In the ChickWeight dataset, how many different diets are there?",
+                options: [
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                ],
+                correctAnswer: 2,
+                explanation: "There are 4 different diets (1, 2, 3, 4) in the ChickWeight dataset."
+            },
+            {
+                id: 49,
+                lab: "lab7",
+                question: "What is Laplace smoothing (additive smoothing) used for in Naive Bayes?",
+                options: [
+                    "To speed up computation",
+                    "To handle zero probability problems",
+                    "To normalize feature values",
+                    "To reduce overfitting"
+                ],
+                correctAnswer: 1,
+                explanation: "Laplace smoothing adds a small value to all counts to avoid zero probabilities when a feature value doesn't appear with a class in training data."
+            },
+            {
+                id: 50,
+                lab: "lab7",
+                question: "Which of these is a common application of Naive Bayes?",
+                options: [
+                    "Spam email detection",
+                    "Image segmentation",
+                    "Time series prediction",
+                    "Anomaly detection in networks"
+                ],
+                correctAnswer: 0,
+                explanation: "Naive Bayes is commonly used for text classification tasks like spam detection and sentiment analysis."
+            },
+            {
+                id: 51,
+                lab: "lab7",
+                question: "What does 'prior probability' refer to in Naive Bayes?",
+                options: [
+                    "Probability before seeing any data",
+                    "Probability of features given the class",
+                    "Probability after seeing the data",
+                    "Probability of the model being correct"
+                ],
+                correctAnswer: 0,
+                explanation: "Prior probability is the initial probability of a class before considering any evidence (features)."
+            },
+            {
+                id: 52,
+                lab: "lab7",
+                question: "Which function would you use to install the e1071 package in R?",
+                options: [
+                    "library(e1071)",
+                    "install.packages('e1071')",
+                    "require(e1071)",
+                    "load.packages('e1071')"
+                ],
+                correctAnswer: 1,
+                explanation: "install.packages('e1071') downloads and installs the package, while library(e1071) loads it for use."
+            },
+            {
+                id: 53,
+                lab: "lab7",
+                question: "What is the main limitation of the 'naive' assumption?",
+                options: [
+                    "It requires large amounts of data",
+                    "It assumes features are independent when they often aren't",
+                    "It only works with normally distributed data",
+                    "It can't handle missing values"
+                ],
+                correctAnswer: 1,
+                explanation: "In real-world data, features often have dependencies, but Naive Bayes assumes conditional independence for computational simplicity."
+            },
+            {
+                id: 54,
+                lab: "lab7",
+                question: "How does Naive Bayes handle continuous features by default?",
+                options: [
+                    "Assumes uniform distribution",
+                    "Assumes normal (Gaussian) distribution",
+                    "Discretizes them into bins",
+                    "Uses kernel density estimation"
+                ],
+                correctAnswer: 1,
+                explanation: "For continuous features, Gaussian Naive Bayes assumes they follow a normal distribution for each class."
+            },
+            {
+                id: 55,
+                lab: "lab7",
+                question: "In the ChickWeight example, what does the 'Chick' column represent?",
+                options: [
+                    "Weight of the chick",
+                    "Age of the chick in days",
+                    "Identifier for individual chicks",
+                    "Type of feed given"
+                ],
+                correctAnswer: 2,
+                explanation: "The 'Chick' column contains identifiers for individual chicks, allowing tracking of each chick over time."
+            },
+            {
+                id: 56,
+                lab: "lab7",
+                question: "What is the difference between classification and regression?",
+                options: [
+                    "Classification predicts categories, regression predicts numbers",
+                    "Classification uses unsupervised learning, regression uses supervised",
+                    "Classification is for small datasets, regression for large",
+                    "There is no difference"
+                ],
+                correctAnswer: 0,
+                explanation: "Classification predicts discrete class labels, while regression predicts continuous numerical values."
+            },
+            {
+                id: 57,
+                lab: "lab7",
+                question: "Which of these evaluation metrics is NOT typically used for classification?",
+                options: [
+                    "Accuracy",
+                    "Mean Squared Error",
+                    "Precision",
+                    "Recall"
+                ],
+                correctAnswer: 1,
+                explanation: "Mean Squared Error is used for regression problems, not classification."
+            },
+            {
+                id: 58,
+                lab: "lab7",
+                question: "What does the 'Time' column represent in the ChickWeight dataset?",
+                options: [
+                    "Time of day measurement was taken",
+                    "Age of chick in days",
+                    "Duration of experiment",
+                    "Time since last feeding"
+                ],
+                correctAnswer: 1,
+                explanation: "The 'Time' column represents the age of the chick in days since birth when the weight was measured."
+            },
+            {
+                id: 59,
+                lab: "lab7",
+                question: "Why is training and test data split in machine learning?",
+                options: [
+                    "To make computation faster",
+                    "To evaluate model performance on unseen data",
+                    "To balance class distributions",
+                    "To reduce feature dimensionality"
+                ],
+                correctAnswer: 1,
+                explanation: "Splitting data allows training on one subset and testing on another to estimate how well the model generalizes to new data."
+            },
+            {
+                id: 60,
+                lab: "lab7",
+                question: "Which of these statements about Naive Bayes is TRUE?",
+                options: [
+                    "It requires feature scaling",
+                    "It's sensitive to irrelevant features",
+                    "It's fast to train and predict",
+                    "It always requires more data than other algorithms"
+                ],
+                correctAnswer: 2,
+                explanation: "Naive Bayes is computationally efficient and fast for both training and prediction due to its simple calculations."
+            }
+        ];
+        let openedQuestions = new Set();
+        let currentFilter = "all";
+        let searchTerm = "";
+
+        function updateProgress() {
+            const answeredCount = openedQuestions.size;
+            const totalCount = quizData.length;
+            const progressPercent = Math.round((answeredCount / totalCount) * 100);
+            document.getElementById('answered-count').textContent = answeredCount;
+            document.getElementById('total-count').textContent = totalCount;
+            document.getElementById('progress-percent').textContent = `${progressPercent}%`;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+        }
+
+        function highlightText(text, term) {
+            if (!term.trim()) return text;
+            const regex = new RegExp(`(${term})`, 'gi');
+            return text.replace(regex, '<span class="search-highlight">$1</span>');
+        }
+
+        function renderQuiz(filter = "all", search = "") {
+            currentFilter = filter;
+            searchTerm = search;
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = '';
+
+            let filtered = quizData;
+            if (filter === "lab6") filtered = quizData.filter(q => q.lab === "lab6");
+            if (filter === "lab7") filtered = quizData.filter(q => q.lab === "lab7");
+            if (search.trim()) {
+                const s = search.toLowerCase();
+                filtered = filtered.filter(q =>
+                    q.question.toLowerCase().includes(s) ||
+                    q.options.some(o => o.toLowerCase().includes(s)) ||
+                    q.explanation.toLowerCase().includes(s)
+                );
+            }
+
+            document.querySelectorAll('button[id^="tab-"]').forEach(b => {
+                b.classList.remove('tab-active'); b.classList.add('tab-inactive');
+            });
+            document.getElementById(`tab-${filter}`).classList.add('tab-active');
+            document.getElementById(`tab-${filter}`).classList.remove('tab-inactive');
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-2 text-center py-12"><i class="fas fa-search text-5xl text-gray-300 mb-4"></i><h3 class="text-xl font-semibold text-gray-600 mb-2">No questions found</h3></div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const isOpened = openedQuestions.has(item.id);
+                const labClass = item.lab === "lab6" ? "lab6-card" : "lab7-card";
+                const labColor = item.lab === "lab6" ? "blue" : "green";
+
+                const highlightedQuestion = searchTerm ? highlightText(item.question, searchTerm) : item.question;
+                const highlightedOptions = item.options.map(opt => searchTerm ? highlightText(opt, searchTerm) : opt);
+
+                // Options are neutral until answer is revealed
+                const optionsHtml = highlightedOptions.map((opt, i) => `
+                    <div class="option p-3 mb-3 rounded-lg bg-gray-50 hover:bg-gray-100 border border-gray-200">
+                        <div class="flex items-center">
+                            <span class="mr-3 w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-700">
+                                ${String.fromCharCode(65 + i)}
+                            </span>
+                            <span class="text-gray-700">${opt}</span>
+                            ${isOpened && i === item.correctAnswer ? '<i class="fas fa-check ml-auto text-green-600"></i>' : ''}
+                        </div>
+                    </div>
+                `).join('');
+
+                const card = document.createElement('div');
+                card.className = `question-card bg-white rounded-xl shadow-lg p-6 ${labClass}`;
+                card.innerHTML = `
+                    <div class="question-header flex justify-between items-start mb-6 cursor-pointer">
+                        <div class="flex items-start">
+                            <span class="question-number text-white font-bold rounded-full w-10 h-10 flex items-center justify-center mr-4 flex-shrink-0">${item.id}</span>
+                            <div>
+                                <div class="flex items-center mb-2">
+                                    <h3 class="text-xl font-bold text-gray-800">${highlightedQuestion}</h3>
+                                    <span class="ml-3 text-xs font-semibold px-3 py-1 rounded-full ${item.lab === 'lab6' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}">
+                                        ${item.lab === 'lab6' ? 'Lab 6: K-Means' : 'Lab 7: Naive Bayes'}
+                                    </span>
+                                </div>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas ${item.lab === 'lab6' ? 'fa-shapes' : 'fa-brain'} mr-1"></i>
+                                    <span>Click to ${isOpened ? 'hide' : 'reveal'} answer</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="${labColor === 'blue' ? 'text-blue-500' : 'text-green-500'} text-2xl">
+                            <i class="fas fa-chevron-down toggle-icon transition-transform duration-300 ${isOpened ? 'rotate-180' : ''}"></i>
+                        </div>
+                    </div>
+
+                    <div class="options mb-2">${optionsHtml}</div>
+
+                    <div class="answer-container ${isOpened ? 'open' : ''}" id="answer-${item.id}">
+                        <div class="${labColor === 'blue' ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'} border rounded-xl p-5">
+                            <div class="flex items-center mb-3">
+                                <i class="fas fa-lightbulb ${labColor === 'blue' ? 'text-blue-600' : 'text-green-600'} text-xl mr-3"></i>
+                                <h4 class="font-bold ${labColor === 'blue' ? 'text-blue-800' : 'text-green-800'}">Correct Answer & Explanation</h4>
+                            </div>
+                            <p class="text-gray-700 font-semibold mb-2">
+                                Correct option: <span class="text-green-700">${String.fromCharCode(65 + item.correctAnswer)}) ${item.options[item.correctAnswer]}</span>
+                            </p>
+                            <p class="text-gray-700">${searchTerm ? highlightText(item.explanation, searchTerm) : item.explanation}</p>
+                        </div>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => {
+                    const answerDiv = card.querySelector(`#answer-${item.id}`);
+                    const icon = card.querySelector('.toggle-icon');
+                    if (openedQuestions.has(item.id)) {
+                        openedQuestions.delete(item.id);
+                        answerDiv.classList.remove('open');
+                        icon.classList.remove('rotate-180');
+                    } else {
+                        openedQuestions.add(item.id);
+                        answerDiv.classList.add('open');
+                        icon.classList.add('rotate-180');
+                    }
+                    updateProgress();
+                });
+
+                container.appendChild(card);
+            });
+
+            updateProgress();
+        }
+
+        function hideAllAnswers() {
+            openedQuestions.clear();
+            renderQuiz(currentFilter, searchTerm);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderQuiz();
+            document.getElementById('tab-all').onclick = () => renderQuiz("all", searchTerm);
+            document.getElementById('tab-lab6').onclick = () => renderQuiz("lab6", searchTerm);
+            document.getElementById('tab-lab7').onclick = () => renderQuiz("lab7", searchTerm);
+            document.getElementById('tab-unanswered').onclick = hideAllAnswers;
+
+            const searchInput = document.getElementById('search-input');
+            let timeout;
+            searchInput.addEventListener('input', e => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => renderQuiz(currentFilter, e.target.value), 300);
+            });
+        });
+    </script>
+</body>
+</html>
